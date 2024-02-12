@@ -9,7 +9,7 @@ class URLMapForm(FlaskForm):
     original_link = URLField(
         'Длинная ссылка',
         validators=(
-            DataRequired(message='Обязательное поле'),
+            DataRequired(message='Обязательное поле.'),
             URL(message='Некорректный URL')
         )
     )

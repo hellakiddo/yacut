@@ -14,7 +14,7 @@ class URLMap(db.Model):
     def save(self):
         if not re.match(ID_PATTERN, self.short):
             raise ValueError(
-                'В идентификаторе использованы недопустимые символы'
+                'В идентификаторе есть недопустимые символы'
             )
         db.session.add(self)
         db.session.commit()

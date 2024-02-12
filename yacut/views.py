@@ -6,6 +6,7 @@ from .models import URLMap
 from .utils import get_unique_short_id
 
 
+
 @app.route('/', methods=['GET', 'POST'])
 def index_view():
     form = URLMapForm()
