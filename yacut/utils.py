@@ -22,4 +22,3 @@ def get_short_id():
     char_set = string.ascii_uppercase + string.ascii_lowercase + string.digits
     short_id = ''.join(random.choices(char_set, k=DEFAULT_ID_LENGTH))
     return short_id
-

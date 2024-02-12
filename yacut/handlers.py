@@ -14,7 +14,6 @@ class InvalidAPIUsage(Exception):
         if status_code is not None:
             self.status_code = status_code
 
-
     def to_dict(self):
         return dict(message=self.message)
 
