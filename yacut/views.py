@@ -1,4 +1,4 @@
-from flask import flash, redirect, render_template
+from flask import flash, redirect, render_template, url_for
 
 from . import app, db
 from .forms import URLMapForm
@@ -12,21 +12,26 @@ def index_view():
     if form.validate_on_submit():
         original = form.original_link.data
         short = form.custom_id.data
-
         if URLMap.query.filter_by(short=short).first():
             flash('Предложенный вариант короткой ссылки уже существует.')
             return render_template('exists_handler.html', form=form)
-
         if not short:
             short = get_unique_short_id()
-
         url_map_obj = URLMap(
             original=original,
             short=short
         )
         db.session.add(url_map_obj)
         db.session.commit()
-        return render_template('index.html', short=short, form=form)
+        forwarding_url = url_for(
+            'forwarding_view', short=short, _external=True
+        )
+        return render_template(
+            'index.html',
+            short=short,
+            forwarding_url=forwarding_url,
+            form=form
+        )
     return render_template('index.html', form=form)
 
 

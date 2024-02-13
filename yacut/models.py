@@ -18,3 +18,14 @@ class URLMap(db.Model):
             )
         db.session.add(self)
         db.session.commit()
+
+    def make_custom_id(self, short):
+        self.original = short["url"]
+        if "custom_id" in short:
+            self.short = short["custom_id"]
+
+
+    @classmethod
+    def get_by_short(cls, short):
+        return cls.query.filter_by(short=short).first()
+
