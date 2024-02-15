@@ -38,6 +38,3 @@ def internal_error(error):
     return render_template(
         '500.html'
     ), HTTPStatus.INTERNAL_SERVER_ERROR
-
-class ExistsError(Exception):
-    pass
