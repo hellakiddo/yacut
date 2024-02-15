@@ -1,31 +1,63 @@
 import re
 from datetime import datetime
+from random import choices
 
-from . import db
-from .constants import ID_PATTERN
+from wtforms.validators import ValidationError
+
+from yacut import db
+from .constants import (
+    CHARS,
+    AUTO_SHORT_LENGTH,
+    SHORT_REGEX, GENERATE_SHORT_MAX_ATTEMPTS,
+    MAX_SHORT_LENGTH, MAX_ORIGINAL_LENGTH
+)
+from .handlers import InvalidAPIUsage
+
+CAN_NOT_CREATE = 'Невозможно создать ID для короткой ссылки'
+VALIDATION_ORIGINAL_ERROR = 'URL не может больше чем {}'
+CUSTOM_ID_EXISTS = 'Предложенный вариант короткой ссылки уже существует.'
+INVALID_CUSTOM_ID = 'Указано недопустимое имя для короткой ссылки'
 
 
 class URLMap(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    original = db.Column(db.String(), nullable=False)
-    short = db.Column(db.String(16), nullable=False, unique=True)
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    original = db.Column(db.String(MAX_ORIGINAL_LENGTH), nullable=False)
+    short = db.Column(db.String(MAX_SHORT_LENGTH), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def save(self):
-        if not re.match(ID_PATTERN, self.short):
-            raise ValueError(
-                'В идентификаторе есть недопустимые символы'
+    @staticmethod
+    def get_by_short(short):
+        return db.session.query(URLMap).filter_by(short=short).first()
+
+    @staticmethod
+    def get_unique_short_id():
+        for attempt in range(GENERATE_SHORT_MAX_ATTEMPTS):
+            short = ''.join(choices(CHARS, k=AUTO_SHORT_LENGTH))
+            if not URLMap.get_by_short(short):
+                return short
+        raise Exception(CAN_NOT_CREATE)
+
+    @staticmethod
+    def save(original, short, is_valid=False):
+        if not (len(original) <= MAX_ORIGINAL_LENGTH):
+            raise ValidationError(
+                VALIDATION_ORIGINAL_ERROR.format(MAX_ORIGINAL_LENGTH)
             )
-        db.session.add(self)
+        if not short:
+            short = URLMap.get_unique_short_id()
+        if not is_valid:
+            if not (len(short) <= MAX_SHORT_LENGTH
+                    and re.fullmatch(SHORT_REGEX, short)):
+                raise ValidationError(INVALID_CUSTOM_ID)
+            if URLMap.get_by_short(short):
+                raise InvalidAPIUsage(CUSTOM_ID_EXISTS)
+        url_map = URLMap(original=original, short=short)
+        db.session.add(url_map)
         db.session.commit()
+        return url_map
 
-    def make_custom_id(self, short):
-        self.original = short["url"]
-        if "custom_id" in short:
-            self.short = short["custom_id"]
-
-
-    @classmethod
-    def get_by_short(cls, short):
-        return cls.query.filter_by(short=short).first()
-
+    def to_dict(self):
+        return dict(
+            original=self.original,
+            short=self.short,
+        )

@@ -1,42 +1,41 @@
-from flask import flash, redirect, render_template, url_for
+from http import HTTPStatus
 
-from . import app, db
+from flask import flash, redirect, render_template, url_for, abort
+
+from . import app
 from .forms import URLMapForm
-from .models import URLMap
-from .utils import get_unique_short_id
+from .models import URLMap, CUSTOM_ID_EXISTS
 
 
 @app.route('/', methods=['GET', 'POST'])
 def index_view():
     form = URLMapForm()
-    if form.validate_on_submit():
-        original = form.original_link.data
-        short = form.custom_id.data
-        if URLMap.query.filter_by(short=short).first():
-            flash('Предложенный вариант короткой ссылки уже существует.')
+    if not form.validate_on_submit():
+        return render_template('index.html', form=form)
+    original = form.original_link.data
+    short = form.custom_id.data
+    try:
+        if URLMap.get_by_short(short):
+            flash(CUSTOM_ID_EXISTS)
             return render_template('exists_handler.html', form=form)
-        if not short:
-            short = get_unique_short_id()
-        url_map_obj = URLMap(
-            original=original,
-            short=short
-        )
-        db.session.add(url_map_obj)
-        db.session.commit()
-        forwarding_url = url_for(
-            'forwarding_view', short=short, _external=True
-        )
         return render_template(
             'index.html',
-            short=short,
-            forwarding_url=forwarding_url,
-            form=form
-        )
-    return render_template('index.html', form=form)
+            form=form,
+            context={
+                'short': url_for(
+                    endpoint='forwarding_view',
+                    short=URLMap.save(
+                        original=original, short=short, is_valid=True
+                    ).short,
+                    _external=True
+                )})
+    except Exception as error:
+        flash(str(error))
 
 
 @app.get('/<short>')
 def forwarding_view(short):
-    url_map_obj = URLMap.query.filter_by(short=short).first_or_404()
-    original_link = url_map_obj.original
-    return redirect(original_link)
+    url_map = URLMap.get_by_short(short)
+    if url_map:
+        return redirect(url_map.original)
+    abort(HTTPStatus.NOT_FOUND)

@@ -1,7 +1,16 @@
+# Yacut - укоротитель ссылок
+
+Технологии:
+
+Python
+
+Flask
+
+
 Клонировать репозиторий и перейти в него в командной строке:
 
 ```
-git clone 
+git clone https://github.com/hellakiddo/yacut.git
 ```
 
 ```
@@ -35,3 +44,22 @@ python3 -m pip install --upgrade pip
 ```
 pip install -r requirements.txt
 ```
+
+Заполнить файл .env
+``` bash
+touch .env
+nano .env
+```
+
+Создать базу данных и применить миграции
+``` bash
+flask db upgrade
+```
+
+Запуск проекта
+``` bash
+flask run
+```
+
+Автор: 
+[https://github.com/hellakiddo](https://github.com/hellakiddo)
