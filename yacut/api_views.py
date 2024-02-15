@@ -8,10 +8,10 @@ from .constants import FORWARDING_VIEW_NAME
 from .handlers import InvalidAPIUsage
 from .models import URLMap
 
-
 ID_NOT_FOUND = 'Указанный id не найден'
 NO_REQUEST_BODY = 'Отсутствует тело запроса'
 REQUIRED_FIELD = '"url" является обязательным полем!'
+
 
 @app.route('/api/id/<short_id>/', methods=('GET',))
 def get_url(short_id):
@@ -19,7 +19,6 @@ def get_url(short_id):
     if url_map_links is None:
         raise InvalidAPIUsage(ID_NOT_FOUND, HTTPStatus.NOT_FOUND)
     return jsonify({'url': url_map_links.original}), HTTPStatus.OK
-
 
 
 @app.route('/api/id/', methods=('POST',))

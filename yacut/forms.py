@@ -1,9 +1,9 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, URLField
-from wtforms.validators import DataRequired, Length, Optional, Regexp, URL, ValidationError
+from wtforms.validators import DataRequired, Length, Optional, Regexp, URL
 
 from .constants import SHORT_REGEX, MAX_SHORT_LENGTH, MAX_ORIGINAL_LENGTH
-from .models import URLMap, CUSTOM_ID_EXISTS
+
 
 LONG_URL = 'Длинная ссылка'
 REQUIRED_FIELD = 'Обязательное поле.'
@@ -13,6 +13,7 @@ ID_MUST_BE_SHORTER = 'Длина идентификатора должна бы�
 INVALID_FIELD = 'Указано недопустимое имя для короткой ссылки'
 CREATE = 'Создать'
 TOO_LONG_URL = 'Ваша ссылка слишком длинная'
+
 
 class URLMapForm(FlaskForm):
     original_link = URLField(
