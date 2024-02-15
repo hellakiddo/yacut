@@ -2,6 +2,7 @@ import re
 from datetime import datetime
 from random import choices
 
+from flask import flash
 from wtforms.validators import ValidationError
 
 from yacut import db
@@ -11,7 +12,7 @@ from .constants import (
     SHORT_REGEX, GENERATE_SHORT_MAX_ATTEMPTS,
     MAX_SHORT_LENGTH, MAX_ORIGINAL_LENGTH
 )
-from .handlers import InvalidAPIUsage
+from .handlers import InvalidAPIUsage, UnableToCreate
 
 CAN_NOT_CREATE = 'Невозможно создать ID для короткой ссылки'
 VALIDATION_ORIGINAL_ERROR = 'URL не может больше чем {}'
@@ -26,30 +27,28 @@ class URLMap(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     @staticmethod
-    def get_by_short(short):
+    def get(short):
         return db.session.query(URLMap).filter_by(short=short).first()
 
     @staticmethod
     def get_unique_short_id():
         for attempt in range(GENERATE_SHORT_MAX_ATTEMPTS):
             short = ''.join(choices(CHARS, k=AUTO_SHORT_LENGTH))
-            if not URLMap.get_by_short(short):
+            if not URLMap.get(short):
                 return short
-        raise Exception(CAN_NOT_CREATE)
+        raise UnableToCreate(CAN_NOT_CREATE)
 
     @staticmethod
     def save(original, short, is_valid=False):
-        if not (len(original) <= MAX_ORIGINAL_LENGTH):
-            raise ValidationError(
-                VALIDATION_ORIGINAL_ERROR.format(MAX_ORIGINAL_LENGTH)
-            )
+        if URLMap.get(short):
+            flash(CUSTOM_ID_EXISTS)
         if not short:
             short = URLMap.get_unique_short_id()
         if not is_valid:
             if not (len(short) <= MAX_SHORT_LENGTH
                     and re.fullmatch(SHORT_REGEX, short)):
                 raise ValidationError(INVALID_CUSTOM_ID)
-            if URLMap.get_by_short(short):
+            if URLMap.get(short):
                 raise InvalidAPIUsage(CUSTOM_ID_EXISTS)
         url_map = URLMap(original=original, short=short)
         db.session.add(url_map)

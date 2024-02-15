@@ -62,4 +62,4 @@ flask run
 ```
 
 Автор: 
-[https://github.com/hellakiddo](https://github.com/hellakiddo)
+Сосламбеков Амир - [https://github.com/hellakiddo](https://github.com/hellakiddo)
