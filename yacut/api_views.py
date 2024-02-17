@@ -31,15 +31,15 @@ def create_id():
     short = data.get('custom_id')
     try:
         return jsonify({
-                'url': data['url'],
-                'short_link': url_for(
-                    FORWARDING_VIEW_NAME,
-                    short=URLMap.save(
-                        original=data['url'],
-                        short=short,
-                    ).short,
-                    _external=True
-                )}
+            'url': data['url'],
+            'short_link': url_for(
+                FORWARDING_VIEW_NAME,
+                short=URLMap.save(
+                original=data['url'],
+                short=short,
+                ).short,
+                _external=True
+            )}
         ), HTTPStatus.CREATED
     except (ValidationError, UnableToCreate) as error:
         raise InvalidAPIUsage(str(error))
