@@ -35,8 +35,8 @@ def create_id():
             'short_link': url_for(
                 FORWARDING_VIEW_NAME,
                 short=URLMap.save(
-                original=data['url'],
-                short=short,
+                    original=data['url'],
+                    short=short,
                 ).short,
                 _external=True
             )}
