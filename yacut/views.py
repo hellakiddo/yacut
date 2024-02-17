@@ -3,9 +3,9 @@ from http import HTTPStatus
 from flask import flash, redirect, render_template, url_for, abort
 
 from . import app
-from .constants import REDIRECT_URL, INDEX_HTML
+from .constants import FORWARDING_VIEW_NAME
 from .forms import URLMapForm
-from .handlers import InvalidAPIUsage
+from .handlers import InvalidAPIUsage, UnableToCreate
 from .models import URLMap
 
 
@@ -13,23 +13,23 @@ from .models import URLMap
 def index_view():
     form = URLMapForm()
     if not form.validate_on_submit():
-        return render_template(INDEX_HTML, form=form)
+        return render_template('index.html', form=form)
     original = form.original_link.data
     short = form.custom_id.data
     try:
         return render_template(
-            INDEX_HTML,
+            'index.html',
             form=form,
             short=url_for(
-                endpoint=REDIRECT_URL,
+                endpoint=FORWARDING_VIEW_NAME,
                 short=URLMap.save(
                     original=original, short=short, is_valid=False
                 ).short,
                 _external=True
             ))
-    except (InvalidAPIUsage, ValueError) as error:
+    except (ValueError, UnableToCreate) as error:
         flash(str(error))
-    return render_template(INDEX_HTML, form=form)
+    return render_template('index.html', form=form)
 
 
 @app.get('/<short>')

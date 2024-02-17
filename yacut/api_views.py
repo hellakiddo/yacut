@@ -5,7 +5,7 @@ from wtforms import ValidationError
 
 from . import app
 from .constants import FORWARDING_VIEW_NAME
-from .handlers import InvalidAPIUsage
+from .handlers import InvalidAPIUsage, UnableToCreate
 from .models import URLMap
 
 ID_NOT_FOUND = 'Указанный id не найден'
@@ -42,5 +42,5 @@ def create_id():
                     _external=True
                 )}
         ), HTTPStatus.CREATED
-    except ValidationError as error:
+    except (ValidationError, UnableToCreate) as error:
         raise InvalidAPIUsage(str(error))

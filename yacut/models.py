@@ -15,9 +15,9 @@ from .constants import (
 from .handlers import InvalidAPIUsage, UnableToCreate
 
 CAN_NOT_CREATE = 'Невозможно создать ID для короткой ссылки'
-VALIDATION_ORIGINAL_ERROR = 'URL не может больше чем {}'
 CUSTOM_ID_EXISTS = 'Предложенный вариант короткой ссылки уже существует.'
 INVALID_CUSTOM_ID = 'Указано недопустимое имя для короткой ссылки'
+VALIDATION_ORIGINAL_ERROR = 'URL не может больше чем {}'
 
 
 class URLMap(db.Model):
@@ -40,16 +40,19 @@ class URLMap(db.Model):
 
     @staticmethod
     def save(original, short, is_valid=False):
-        if URLMap.get(short):
-            flash(CUSTOM_ID_EXISTS)
+        if not (is_valid or len(original) <= MAX_ORIGINAL_LENGTH):
+            raise ValidationError(
+                VALIDATION_ORIGINAL_ERROR.format(MAX_ORIGINAL_LENGTH)
+            )
         if not short:
             short = URLMap.get_unique_short_id()
+            is_valid = True
         if not is_valid:
             if not (len(short) <= MAX_SHORT_LENGTH
                     and re.fullmatch(SHORT_REGEX, short)):
                 raise ValidationError(INVALID_CUSTOM_ID)
             if URLMap.get(short):
-                raise InvalidAPIUsage(CUSTOM_ID_EXISTS)
+                raise UnableToCreate(CUSTOM_ID_EXISTS)
         url_map = URLMap(original=original, short=short)
         db.session.add(url_map)
         db.session.commit()
