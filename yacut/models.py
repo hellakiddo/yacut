@@ -2,7 +2,6 @@ import re
 from datetime import datetime
 from random import choices
 
-from flask import flash
 from wtforms.validators import ValidationError
 
 from yacut import db
@@ -12,7 +11,7 @@ from .constants import (
     SHORT_REGEX, GENERATE_SHORT_MAX_ATTEMPTS,
     MAX_SHORT_LENGTH, MAX_ORIGINAL_LENGTH
 )
-from .handlers import InvalidAPIUsage, UnableToCreate
+from .handlers import UnableToCreate
 
 CAN_NOT_CREATE = 'Невозможно создать ID для короткой ссылки'
 CUSTOM_ID_EXISTS = 'Предложенный вариант короткой ссылки уже существует.'

@@ -5,7 +5,7 @@ from flask import flash, redirect, render_template, url_for, abort
 from . import app
 from .constants import FORWARDING_VIEW_NAME
 from .forms import URLMapForm
-from .handlers import InvalidAPIUsage, UnableToCreate
+from .handlers import UnableToCreate
 from .models import URLMap
 
 
