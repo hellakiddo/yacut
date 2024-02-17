@@ -20,7 +20,7 @@ def index_view():
         return render_template(
             'index.html',
             form=form,
-            short=url_for(
+            short_url=url_for(
                 endpoint=FORWARDING_VIEW_NAME,
                 short=URLMap.save(
                     original=original, short=short, is_valid=False

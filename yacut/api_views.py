@@ -30,8 +30,7 @@ def create_id():
         raise InvalidAPIUsage(REQUIRED_FIELD)
     short = data.get('custom_id')
     try:
-        return jsonify(
-            {
+        return jsonify({
                 'url': data['url'],
                 'short_link': url_for(
                     FORWARDING_VIEW_NAME,

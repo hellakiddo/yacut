@@ -16,7 +16,9 @@ from .handlers import UnableToCreate
 CAN_NOT_CREATE = 'Невозможно создать ID для короткой ссылки'
 CUSTOM_ID_EXISTS = 'Предложенный вариант короткой ссылки уже существует.'
 INVALID_CUSTOM_ID = 'Указано недопустимое имя для короткой ссылки'
-VALIDATION_ORIGINAL_ERROR = 'URL не может больше чем {}'
+VALIDATION_ORIGINAL_ERROR = 'URL не может больше чем {}'.format(
+    MAX_ORIGINAL_LENGTH
+)
 
 
 class URLMap(db.Model):
@@ -41,7 +43,7 @@ class URLMap(db.Model):
     def save(original, short, is_valid=False):
         if not (is_valid or len(original) <= MAX_ORIGINAL_LENGTH):
             raise ValidationError(
-                VALIDATION_ORIGINAL_ERROR.format(MAX_ORIGINAL_LENGTH)
+                VALIDATION_ORIGINAL_ERROR
             )
         if not short:
             short = URLMap.get_unique_short_id()
